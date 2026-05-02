@@ -337,6 +337,30 @@ paths:
               schema:
                 $ref: "#/components/schemas/Reflection"
 
+  /users/{id}/reflections/{reflectionId}:
+    delete:
+      operationId: deleteReflection
+      tags: [reflections]
+      summary: Delete a reflection note
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          name: reflectionId
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Reflection deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
   /dashboard/summary:
     get:
       operationId: getDashboardSummary

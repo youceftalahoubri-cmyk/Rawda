@@ -5,17 +5,20 @@ import {
   useGetUserProgress,
   useGetUserBookmarks,
   useGetUserReflections,
+  useDeleteReflection,
   getGetUserQueryKey,
   getGetUserProgressQueryKey,
   getGetUserBookmarksQueryKey,
   getGetUserReflectionsQueryKey
 } from "@workspace/api-client-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
-import { BookOpen, Flame, Star, Trophy, Clock, Medal, Bookmark } from "lucide-react";
+import { BookOpen, Flame, Star, Trophy, Clock, Medal, Bookmark, Trash2, PenLine, CalendarDays } from "lucide-react";
 import { motion } from "framer-motion";
 
 const HARDCODED_USER_ID = 1;
@@ -36,6 +39,8 @@ export default function Dashboard() {
   const { data: reflections, isLoading: isReflectionsLoading } = useGetUserReflections(HARDCODED_USER_ID, {
     query: { queryKey: getGetUserReflectionsQueryKey(HARDCODED_USER_ID) }
   });
+  const deleteReflection = useDeleteReflection(HARDCODED_USER_ID);
+  const queryClient = useQueryClient();
 
   const nextLevelXp = (progress?.level || 1) * 1000;
   const currentLevelProgress = progress ? (progress.xp % 1000) / 1000 * 100 : 0;
@@ -207,29 +212,70 @@ export default function Dashboard() {
           </TabsContent>
 
           <TabsContent value="reflections" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground flex items-center gap-2">
+                <PenLine className="h-4 w-4" />
+                {reflections?.length || 0} journal {(reflections?.length || 0) === 1 ? "entry" : "entries"}
+              </p>
+              <Link href="/library">
+                <Button variant="outline" size="sm" className="gap-2 text-xs">
+                  <BookOpen className="h-3.5 w-3.5" /> Read a story to add more
+                </Button>
+              </Link>
+            </div>
+
             {reflections?.length === 0 ? (
-              <div className="p-12 text-center text-muted-foreground bg-card border border-border rounded-xl shadow-sm">No reflections yet. Write down your thoughts after reading a story.</div>
+              <div className="p-16 text-center bg-card border border-dashed border-border rounded-2xl">
+                <PenLine className="h-10 w-10 mx-auto mb-4 text-muted-foreground/40" />
+                <p className="font-medium text-foreground/70 mb-1">Your journal is empty</p>
+                <p className="text-sm text-muted-foreground">After reading a story, scroll to the bottom to write your reflection.</p>
+              </div>
             ) : (
-              <div className="grid gap-6">
-                {reflections?.map((reflection) => (
-                  <Card key={reflection.id}>
-                    <CardHeader className="pb-3">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <CardDescription>Story</CardDescription>
-                          <CardTitle className="text-lg">
-                            <Link href={`/story/${reflection.storyId}`} className="hover:text-primary transition-colors">
-                              {reflection.storyTitle}
-                            </Link>
-                          </CardTitle>
+              <div className="space-y-4">
+                {reflections?.map((reflection, i) => (
+                  <motion.div
+                    key={reflection.id}
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.05 }}
+                    exit={{ opacity: 0, scale: 0.97 }}
+                  >
+                    <Card className="group relative overflow-hidden border-l-4 border-l-primary/30 hover:border-l-primary transition-colors">
+                      <CardHeader className="pb-2">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="min-w-0">
+                            <CardDescription className="text-xs uppercase tracking-wider mb-1">From story</CardDescription>
+                            <CardTitle className="text-base font-serif leading-snug">
+                              <Link href={`/story/${reflection.storyId}`} className="hover:text-primary transition-colors">
+                                {reflection.storyTitle}
+                              </Link>
+                            </CardTitle>
+                          </div>
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                              <CalendarDays className="h-3 w-3" />
+                              {new Date(reflection.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                            </span>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                              onClick={() => {
+                                deleteReflection.mutate({ reflectionId: reflection.id }, {
+                                  onSuccess: () => queryClient.invalidateQueries({ queryKey: getGetUserReflectionsQueryKey(HARDCODED_USER_ID) })
+                                });
+                              }}
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
                         </div>
-                        <span className="text-xs text-muted-foreground font-mono">{new Date(reflection.createdAt).toLocaleDateString()}</span>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-foreground/90 whitespace-pre-wrap">{reflection.content}</p>
-                    </CardContent>
-                  </Card>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-foreground/85 leading-relaxed whitespace-pre-wrap text-sm">{reflection.content}</p>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
                 ))}
               </div>
             )}

@@ -9,6 +9,7 @@ import {
   useGetUserBookmarks,
   getGetUserBookmarksQueryKey,
   useCreateReflection,
+  useDeleteReflection,
   useGetUserReflections,
   getGetUserReflectionsQueryKey
 } from "@workspace/api-client-react";
@@ -17,7 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Bookmark, BookmarkCheck, CheckCircle2, Clock, Share2, Star, Send } from "lucide-react";
+import { ArrowLeft, Bookmark, BookmarkCheck, CheckCircle2, Clock, Share2, Star, Send, Trash2, PenLine } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
@@ -53,6 +54,7 @@ export default function StoryPage() {
   const addBookmark = useAddBookmark(HARDCODED_USER_ID);
   const removeBookmark = useRemoveBookmark(HARDCODED_USER_ID);
   const createReflection = useCreateReflection(HARDCODED_USER_ID);
+  const deleteReflection = useDeleteReflection(HARDCODED_USER_ID);
 
   const isBookmarked = bookmarks?.some(b => b.storyId === id);
   const storyReflections = reflections?.filter(r => r.storyId === id);
@@ -109,7 +111,16 @@ export default function StoryPage() {
       onSuccess: () => {
         setReflectionText("");
         queryClient.invalidateQueries({ queryKey: getGetUserReflectionsQueryKey(HARDCODED_USER_ID) });
-        toast({ title: "Reflection saved" });
+        toast({ title: "Reflection saved", description: "Your note has been added to your journal." });
+      }
+    });
+  };
+
+  const handleDeleteReflection = (reflectionId: number) => {
+    deleteReflection.mutate({ reflectionId }, {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getGetUserReflectionsQueryKey(HARDCODED_USER_ID) });
+        toast({ title: "Reflection deleted" });
       }
     });
   };
@@ -261,42 +272,67 @@ export default function StoryPage() {
 
           {/* Reflections Section */}
           <div className="mt-16 pt-12 border-t border-border/40">
-            <h3 className="text-2xl font-serif font-bold mb-6">Your Reflections</h3>
+            <div className="flex items-center gap-3 mb-6">
+              <PenLine className="h-6 w-6 text-primary" />
+              <h3 className="text-2xl font-serif font-bold">Your Journal</h3>
+              {storyReflections && storyReflections.length > 0 && (
+                <span className="text-sm text-muted-foreground bg-muted rounded-full px-2.5 py-0.5">
+                  {storyReflections.length} {storyReflections.length === 1 ? "note" : "notes"}
+                </span>
+              )}
+            </div>
             
-            <div className="space-y-6 mb-8">
-              <AnimatePresence>
+            <div className="space-y-4 mb-8">
+              <AnimatePresence mode="popLayout">
                 {storyReflections?.map(reflection => (
                   <motion.div 
                     key={reflection.id}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="p-6 bg-muted/30 rounded-xl border border-border/50"
+                    exit={{ opacity: 0, scale: 0.97 }}
+                    className="group relative p-6 bg-muted/30 rounded-xl border-l-4 border-l-primary/30 hover:border-l-primary border border-border/50 transition-colors"
                   >
-                    <p className="text-foreground/90 whitespace-pre-wrap">{reflection.content}</p>
-                    <p className="text-xs text-muted-foreground mt-4 font-mono">
-                      {new Date(reflection.createdAt).toLocaleDateString()}
-                    </p>
+                    <p className="text-foreground/90 whitespace-pre-wrap leading-relaxed">{reflection.content}</p>
+                    <div className="flex items-center justify-between mt-4">
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(reflection.createdAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+                      </p>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => handleDeleteReflection(reflection.id)}
+                        disabled={deleteReflection.isPending}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
                   </motion.div>
                 ))}
               </AnimatePresence>
               {storyReflections?.length === 0 && (
-                <p className="text-muted-foreground italic">No reflections yet. What are your thoughts on this story?</p>
+                <p className="text-muted-foreground italic text-sm">No notes yet for this story. What moved you?</p>
               )}
             </div>
 
-            <div className="bg-card border border-border rounded-xl p-4 shadow-sm">
+            <div className="bg-card border border-border rounded-2xl p-5 shadow-sm">
+              <div className="flex items-center gap-2 mb-3 text-xs text-muted-foreground font-medium uppercase tracking-wider">
+                <PenLine className="h-3.5 w-3.5" /> New journal entry
+              </div>
               <Textarea 
-                placeholder="Write down your thoughts, lessons learned, or how this applies to your life..."
-                className="min-h-[120px] resize-y border-none focus-visible:ring-0 text-base"
+                placeholder="Write down your thoughts, lessons learned, or how this story applies to your life..."
+                className="min-h-[120px] resize-y border-none focus-visible:ring-0 text-base bg-transparent p-0"
                 value={reflectionText}
                 onChange={(e) => setReflectionText(e.target.value)}
               />
-              <div className="flex justify-end mt-4 pt-4 border-t border-border/40">
+              <div className="flex items-center justify-between mt-4 pt-4 border-t border-border/40">
+                <span className="text-xs text-muted-foreground">{reflectionText.length} characters</span>
                 <Button 
                   onClick={handlePostReflection}
                   disabled={!reflectionText.trim() || createReflection.isPending}
+                  className="gap-2"
                 >
-                  <Send className="mr-2 h-4 w-4" /> Save Reflection
+                  <Send className="h-4 w-4" /> Save to Journal
                 </Button>
               </div>
             </div>

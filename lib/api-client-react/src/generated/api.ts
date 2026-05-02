@@ -1306,6 +1306,94 @@ export const useCreateReflection = <
 };
 
 /**
+ * @summary Delete a reflection note
+ */
+export const getDeleteReflectionUrl = (id: number, reflectionId: number) => {
+  return `/api/users/${id}/reflections/${reflectionId}`;
+};
+
+export const deleteReflection = async (
+  id: number,
+  reflectionId: number,
+  options?: RequestInit,
+): Promise<SuccessResponse> => {
+  return customFetch<SuccessResponse>(
+    getDeleteReflectionUrl(id, reflectionId),
+    {
+      ...options,
+      method: "DELETE",
+    },
+  );
+};
+
+export const getDeleteReflectionMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteReflection>>,
+    TError,
+    { id: number; reflectionId: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteReflection>>,
+  TError,
+  { id: number; reflectionId: number },
+  TContext
+> => {
+  const mutationKey = ["deleteReflection"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteReflection>>,
+    { id: number; reflectionId: number }
+  > = (props) => {
+    const { id, reflectionId } = props ?? {};
+
+    return deleteReflection(id, reflectionId, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteReflectionMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteReflection>>
+>;
+
+export type DeleteReflectionMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Delete a reflection note
+ */
+export const useDeleteReflection = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteReflection>>,
+    TError,
+    { id: number; reflectionId: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof deleteReflection>>,
+  TError,
+  { id: number; reflectionId: number },
+  TContext
+> => {
+  return useMutation(getDeleteReflectionMutationOptions(options));
+};
+
+/**
  * @summary Get overall platform statistics
  */
 export const getGetDashboardSummaryUrl = () => {

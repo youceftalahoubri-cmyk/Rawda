@@ -310,6 +310,18 @@ export const CreateReflectionBody = zod.object({
 });
 
 /**
+ * @summary Delete a reflection note
+ */
+export const DeleteReflectionParams = zod.object({
+  id: zod.coerce.number(),
+  reflectionId: zod.coerce.number(),
+});
+
+export const DeleteReflectionResponse = zod.object({
+  success: zod.boolean(),
+});
+
+/**
  * @summary Get overall platform statistics
  */
 export const GetDashboardSummaryResponse = zod.object({

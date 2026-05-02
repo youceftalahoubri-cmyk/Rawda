@@ -2,7 +2,7 @@ import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
 import { reflectionsTable, storiesTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
-import { GetUserReflectionsParams, CreateReflectionParams, CreateReflectionBody } from "@workspace/api-zod";
+import { GetUserReflectionsParams, CreateReflectionParams, CreateReflectionBody, DeleteReflectionParams } from "@workspace/api-zod";
 
 const router: IRouter = Router();
 
@@ -40,6 +40,12 @@ router.post("/users/:id/reflections", async (req, res) => {
     content: ref.content,
     createdAt: ref.createdAt?.toISOString() ?? new Date().toISOString(),
   });
+});
+
+router.delete("/users/:id/reflections/:reflectionId", async (req, res) => {
+  const params = DeleteReflectionParams.parse({ id: req.params.id, reflectionId: req.params.reflectionId });
+  await db.delete(reflectionsTable).where(eq(reflectionsTable.id, params.reflectionId));
+  res.json({ success: true });
 });
 
 export default router;
