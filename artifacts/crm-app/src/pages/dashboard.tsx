@@ -21,6 +21,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { BookOpen, Flame, Star, Trophy, Clock, Medal, Bookmark, Trash2, PenLine, CalendarDays } from "lucide-react";
 import { motion } from "framer-motion";
 import { usePageTitle } from "@/hooks/use-page-title";
+import { ReadingHeatmap } from "@/components/reading-heatmap";
 
 const HARDCODED_USER_ID = 1;
 
@@ -152,6 +153,11 @@ export default function Dashboard() {
               <div className="text-3xl font-bold font-serif">{reflections?.length || 0}</div>
             </CardContent>
           </Card>
+        </div>
+
+        {/* Reading Heatmap */}
+        <div className="bg-card border border-border rounded-2xl p-6 shadow-sm mb-8">
+          <ReadingHeatmap activity={progress?.recentActivity ?? []} weeks={16} />
         </div>
 
         <Tabs defaultValue="activity" className="space-y-8">
