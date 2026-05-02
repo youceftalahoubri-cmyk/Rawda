@@ -1,7 +1,7 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
 import { storiesTable, categoriesTable } from "@workspace/db";
-import { eq, ilike, and, sql, desc, asc } from "drizzle-orm";
+import { eq, ilike, and, sql, desc, asc, ne, or } from "drizzle-orm";
 import {
   ListStoriesQueryParams,
   CreateStoryBody,
@@ -115,6 +115,86 @@ router.get("/stories/:id", async (req, res) => {
     .where(eq(storiesTable.id, params.id));
   if (!row) { res.status(404).json({ error: "Story not found" }); return; }
   res.json({ ...row, createdAt: row.createdAt?.toISOString() ?? new Date().toISOString(), categoryName: row.categoryName ?? "" });
+});
+
+router.get("/stories/:id/related", async (req, res) => {
+  const { id } = GetStoryParams.parse({ id: req.params.id });
+  const limit = Math.min(parseInt(req.query.limit as string) || 3, 6);
+
+  // Fetch the current story to know its category and theme
+  const [current] = await db
+    .select({ categoryId: storiesTable.categoryId, theme: storiesTable.theme })
+    .from(storiesTable)
+    .where(eq(storiesTable.id, id));
+
+  if (!current) { res.json([]); return; }
+
+  const selectFields = {
+    id: storiesTable.id,
+    title: storiesTable.title,
+    titleAr: storiesTable.titleAr,
+    slug: storiesTable.slug,
+    excerpt: storiesTable.excerpt,
+    content: storiesTable.content,
+    categoryId: storiesTable.categoryId,
+    categoryName: categoriesTable.name,
+    difficulty: storiesTable.difficulty,
+    theme: storiesTable.theme,
+    readingTimeMinutes: storiesTable.readingTimeMinutes,
+    isFeatured: storiesTable.isFeatured,
+    coverImageUrl: storiesTable.coverImageUrl,
+    lessons: storiesTable.lessons,
+    xpReward: storiesTable.xpReward,
+    viewCount: storiesTable.viewCount,
+    createdAt: storiesTable.createdAt,
+  };
+
+  // Priority 1: same category AND same theme
+  const sameConditions = [
+    ne(storiesTable.id, id),
+    eq(storiesTable.categoryId, current.categoryId),
+  ];
+  if (current.theme) sameConditions.push(ilike(storiesTable.theme, `%${current.theme}%`));
+
+  let rows = await db
+    .select(selectFields)
+    .from(storiesTable)
+    .leftJoin(categoriesTable, eq(storiesTable.categoryId, categoriesTable.id))
+    .where(and(...sameConditions))
+    .orderBy(desc(storiesTable.viewCount))
+    .limit(limit);
+
+  // Fill remaining slots from same category
+  if (rows.length < limit) {
+    const existingIds = new Set([id, ...rows.map(r => r.id)]);
+    const extra = await db
+      .select(selectFields)
+      .from(storiesTable)
+      .leftJoin(categoriesTable, eq(storiesTable.categoryId, categoriesTable.id))
+      .where(and(
+        ne(storiesTable.id, id),
+        eq(storiesTable.categoryId, current.categoryId),
+        sql`${storiesTable.id} NOT IN (${sql.join(Array.from(existingIds).map(i => sql`${i}`), sql`, `)})`
+      ))
+      .orderBy(desc(storiesTable.viewCount))
+      .limit(limit - rows.length);
+    rows = [...rows, ...extra];
+  }
+
+  // Fill remaining slots from popular stories across all categories
+  if (rows.length < limit) {
+    const existingIds = new Set([id, ...rows.map(r => r.id)]);
+    const fallback = await db
+      .select(selectFields)
+      .from(storiesTable)
+      .leftJoin(categoriesTable, eq(storiesTable.categoryId, categoriesTable.id))
+      .where(sql`${storiesTable.id} NOT IN (${sql.join(Array.from(existingIds).map(i => sql`${i}`), sql`, `)})`)
+      .orderBy(desc(storiesTable.viewCount))
+      .limit(limit - rows.length);
+    rows = [...rows, ...fallback];
+  }
+
+  res.json(rows.map(r => ({ ...r, createdAt: r.createdAt?.toISOString() ?? new Date().toISOString(), categoryName: r.categoryName ?? "" })));
 });
 
 router.post("/stories", async (req, res) => {

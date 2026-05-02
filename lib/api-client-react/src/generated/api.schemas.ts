@@ -214,3 +214,7 @@ export const ListStoriesSortBy = {
   longest: "longest",
   xp: "xp",
 } as const;
+
+export type GetRelatedStoriesParams = {
+  limit?: number;
+};

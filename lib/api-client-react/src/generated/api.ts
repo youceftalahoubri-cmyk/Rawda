@@ -25,6 +25,7 @@ import type {
   CreateStoryBody,
   DailyQuote,
   DashboardSummary,
+  GetRelatedStoriesParams,
   HealthStatus,
   LeaderboardEntry,
   ListStoriesParams,
@@ -452,6 +453,116 @@ export function useGetStory<
   },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getGetStoryQueryOptions(id, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Get related stories by category and theme
+ */
+export const getGetRelatedStoriesUrl = (
+  id: number,
+  params?: GetRelatedStoriesParams,
+) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/stories/${id}/related?${stringifiedParams}`
+    : `/api/stories/${id}/related`;
+};
+
+export const getRelatedStories = async (
+  id: number,
+  params?: GetRelatedStoriesParams,
+  options?: RequestInit,
+): Promise<Story[]> => {
+  return customFetch<Story[]>(getGetRelatedStoriesUrl(id, params), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetRelatedStoriesQueryKey = (
+  id: number,
+  params?: GetRelatedStoriesParams,
+) => {
+  return [`/api/stories/${id}/related`, ...(params ? [params] : [])] as const;
+};
+
+export const getGetRelatedStoriesQueryOptions = <
+  TData = Awaited<ReturnType<typeof getRelatedStories>>,
+  TError = ErrorType<unknown>,
+>(
+  id: number,
+  params?: GetRelatedStoriesParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getRelatedStories>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetRelatedStoriesQueryKey(id, params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getRelatedStories>>
+  > = ({ signal }) =>
+    getRelatedStories(id, params, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!id,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getRelatedStories>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetRelatedStoriesQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getRelatedStories>>
+>;
+export type GetRelatedStoriesQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get related stories by category and theme
+ */
+
+export function useGetRelatedStories<
+  TData = Awaited<ReturnType<typeof getRelatedStories>>,
+  TError = ErrorType<unknown>,
+>(
+  id: number,
+  params?: GetRelatedStoriesParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getRelatedStories>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetRelatedStoriesQueryOptions(id, params, options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;

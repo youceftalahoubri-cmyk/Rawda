@@ -135,6 +135,33 @@ paths:
               schema:
                 $ref: "#/components/schemas/Story"
 
+  /stories/{id}/related:
+    get:
+      operationId: getRelatedStories
+      tags: [stories]
+      summary: Get related stories by category and theme
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            default: 3
+      responses:
+        "200":
+          description: Related stories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Story"
+
   /categories:
     get:
       operationId: listCategories

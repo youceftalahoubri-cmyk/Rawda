@@ -11,7 +11,9 @@ import {
   useCreateReflection,
   useDeleteReflection,
   useGetUserReflections,
-  getGetUserReflectionsQueryKey
+  getGetUserReflectionsQueryKey,
+  useGetRelatedStories,
+  getGetRelatedStoriesQueryKey,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -60,6 +62,10 @@ export default function StoryPage() {
   const removeBookmark = useRemoveBookmark();
   const createReflection = useCreateReflection();
   const deleteReflection = useDeleteReflection();
+
+  const { data: related } = useGetRelatedStories(id, { limit: 3 }, {
+    query: { enabled: !!id, queryKey: getGetRelatedStoriesQueryKey(id, { limit: 3 }) }
+  });
 
   const isBookmarked = bookmarks?.some(b => b.storyId === id);
   const storyReflections = reflections?.filter(r => r.storyId === id);
@@ -390,6 +396,51 @@ export default function StoryPage() {
             </div>
           </div>
         </div>
+
+        {/* You Might Also Like */}
+        {related && related.length > 0 && (
+          <div className="border-t border-border/40 bg-muted/20 py-16">
+            <div className="container mx-auto px-4 max-w-4xl">
+              <h2 className="text-2xl font-serif font-bold text-foreground mb-2">You might also like</h2>
+              <p className="text-sm text-muted-foreground mb-8">More stories from the same tradition</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+                {related.map((s, i) => (
+                  <motion.div
+                    key={s.id}
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.08 }}
+                  >
+                    <Link href={`/story/${s.id}`}>
+                      <div className="group bg-card border border-border rounded-2xl p-5 h-full hover:border-primary/40 hover:shadow-md transition-all duration-200 cursor-pointer flex flex-col">
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="text-xs font-medium text-primary bg-primary/10 px-2.5 py-1 rounded-full">
+                            {s.categoryName}
+                          </span>
+                          <span className="text-xs text-muted-foreground flex items-center gap-1">
+                            <Clock className="h-3 w-3" /> {s.readingTimeMinutes}m
+                          </span>
+                        </div>
+                        <h3 className="font-serif font-bold text-base text-foreground leading-snug mb-2 group-hover:text-primary transition-colors">
+                          {s.title}
+                        </h3>
+                        <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2 flex-1">
+                          {s.excerpt}
+                        </p>
+                        <div className="flex items-center justify-between mt-4 pt-3 border-t border-border/40">
+                          <span className="text-xs text-muted-foreground capitalize">{s.difficulty}</span>
+                          <span className="text-xs text-secondary font-semibold flex items-center gap-1">
+                            <Star className="h-3 w-3 fill-current" /> +{s.xpReward} XP
+                          </span>
+                        </div>
+                      </div>
+                    </Link>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
       </article>
     </Layout>
   );

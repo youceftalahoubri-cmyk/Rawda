@@ -123,6 +123,42 @@ export const GetStoryResponse = zod.object({
 });
 
 /**
+ * @summary Get related stories by category and theme
+ */
+export const GetRelatedStoriesParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const getRelatedStoriesQueryLimitDefault = 3;
+
+export const GetRelatedStoriesQueryParams = zod.object({
+  limit: zod.coerce.number().default(getRelatedStoriesQueryLimitDefault),
+});
+
+export const GetRelatedStoriesResponseItem = zod.object({
+  id: zod.number(),
+  title: zod.string(),
+  titleAr: zod.string().optional(),
+  slug: zod.string(),
+  excerpt: zod.string(),
+  content: zod.string(),
+  categoryId: zod.number(),
+  categoryName: zod.string(),
+  difficulty: zod.enum(["beginner", "intermediate", "advanced"]),
+  theme: zod.string().optional(),
+  readingTimeMinutes: zod.number(),
+  isFeatured: zod.boolean(),
+  coverImageUrl: zod.string().optional(),
+  lessons: zod.string().optional(),
+  xpReward: zod.number(),
+  viewCount: zod.number(),
+  createdAt: zod.string(),
+});
+export const GetRelatedStoriesResponse = zod.array(
+  GetRelatedStoriesResponseItem,
+);
+
+/**
  * @summary List all categories
  */
 export const ListCategoriesResponseItem = zod.object({
