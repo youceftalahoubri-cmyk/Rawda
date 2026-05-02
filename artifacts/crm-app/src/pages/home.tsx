@@ -9,7 +9,7 @@ import {
   useListCategories,
   useGetDashboardSummary
 } from "@workspace/api-client-react";
-import { BookOpen, ChevronRight, Clock, Star, Trophy } from "lucide-react";
+import { BookOpen, ChevronRight, Clock, Moon, Star, Trophy } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Home() {
@@ -55,7 +55,41 @@ export default function Home() {
       </div>
 
       <div className="container mx-auto px-4 py-16 space-y-24">
-        
+
+        {/* Ramadan Banner */}
+        <section>
+          <Link href="/ramadan">
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              whileHover={{ scale: 1.01 }}
+              className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#1a1a2e] via-[#16213e] to-[#0f3460] text-white p-6 md:p-8 cursor-pointer border border-amber-400/20 hover:border-amber-400/50 transition-colors shadow-lg"
+            >
+              <div className="absolute inset-0 overflow-hidden pointer-events-none select-none">
+                {["✦","✧","✦","✧","✦","✧","✦"].map((s, i) => (
+                  <span key={i} className="absolute text-white/10" style={{ top: `${15 + (i * 13) % 70}%`, left: `${5 + (i * 15) % 90}%`, fontSize: `${6 + (i % 3) * 4}px` }}>{s}</span>
+                ))}
+              </div>
+              <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-amber-400/20 flex items-center justify-center flex-shrink-0">
+                    <Moon className="h-6 w-6 text-amber-300" />
+                  </div>
+                  <div>
+                    <p className="text-amber-300 text-xs font-semibold uppercase tracking-widest mb-1">Special Collection</p>
+                    <h3 className="text-xl md:text-2xl font-serif font-bold text-white">Ramadan Mode</h3>
+                    <p className="text-white/60 text-sm mt-0.5">30-day reading challenge · Iftar countdown · Curated stories</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 bg-amber-400/20 border border-amber-400/30 rounded-xl px-5 py-2.5 text-amber-200 font-medium text-sm flex-shrink-0 hover:bg-amber-400/30 transition-colors">
+                  Enter Ramadan Mode <ChevronRight className="h-4 w-4 ml-1" />
+                </div>
+              </div>
+            </motion.div>
+          </Link>
+        </section>
+
         {/* Daily Quote */}
         <section>
           {isQuoteLoading ? (

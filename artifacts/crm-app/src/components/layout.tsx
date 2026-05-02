@@ -27,6 +27,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
               <Link href="/leaderboard" className={`transition-colors hover:text-primary ${location === '/leaderboard' ? 'text-primary' : 'text-muted-foreground'}`}>
                 Leaderboard
               </Link>
+              <Link href="/ramadan" className={`transition-colors hover:text-amber-500 flex items-center gap-1 ${location === '/ramadan' ? 'text-amber-500' : 'text-muted-foreground'}`}>
+                <Moon className="h-3.5 w-3.5" />
+                Ramadan
+              </Link>
             </nav>
           </div>
 
