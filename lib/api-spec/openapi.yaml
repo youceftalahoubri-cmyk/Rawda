@@ -1,22 +1,35 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Rawdat - Islamic Stories Platform API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: stories
+    description: Story operations
+  - name: categories
+    description: Category operations
+  - name: users
+    description: User operations
+  - name: progress
+    description: Progress and gamification
+  - name: bookmarks
+    description: Bookmark operations
+  - name: reflections
+    description: Reflection notes
+  - name: dashboard
+    description: Dashboard and analytics
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +37,347 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /stories:
+    get:
+      operationId: listStories
+      tags: [stories]
+      summary: List all stories
+      parameters:
+        - in: query
+          name: categoryId
+          schema:
+            type: integer
+        - in: query
+          name: difficulty
+          schema:
+            type: string
+            enum: [beginner, intermediate, advanced]
+        - in: query
+          name: theme
+          schema:
+            type: string
+        - in: query
+          name: search
+          schema:
+            type: string
+        - in: query
+          name: limit
+          schema:
+            type: integer
+        - in: query
+          name: offset
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of stories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Story"
+    post:
+      operationId: createStory
+      tags: [stories]
+      summary: Create a story
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateStoryBody"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Story"
+
+  /stories/featured:
+    get:
+      operationId: getFeaturedStories
+      tags: [stories]
+      summary: Get featured/daily stories
+      responses:
+        "200":
+          description: Featured stories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Story"
+
+  /stories/{id}:
+    get:
+      operationId: getStory
+      tags: [stories]
+      summary: Get a single story
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Story detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Story"
+
+  /categories:
+    get:
+      operationId: listCategories
+      tags: [categories]
+      summary: List all categories
+      responses:
+        "200":
+          description: List of categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Category"
+    post:
+      operationId: createCategory
+      tags: [categories]
+      summary: Create a category
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCategoryBody"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+
+  /users/{id}:
+    get:
+      operationId: getUser
+      tags: [users]
+      summary: Get user profile
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  /users/{id}/progress:
+    get:
+      operationId: getUserProgress
+      tags: [progress]
+      summary: Get user progress and gamification stats
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: User progress
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProgress"
+
+  /users/{id}/progress/story:
+    post:
+      operationId: recordStoryProgress
+      tags: [progress]
+      summary: Record story reading progress
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RecordProgressBody"
+      responses:
+        "200":
+          description: Updated progress
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProgress"
+
+  /users/{id}/bookmarks:
+    get:
+      operationId: getUserBookmarks
+      tags: [bookmarks]
+      summary: Get user bookmarks
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Bookmarks list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Bookmark"
+    post:
+      operationId: addBookmark
+      tags: [bookmarks]
+      summary: Add bookmark
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddBookmarkBody"
+      responses:
+        "201":
+          description: Bookmark created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Bookmark"
+
+  /users/{id}/bookmarks/{storyId}:
+    delete:
+      operationId: removeBookmark
+      tags: [bookmarks]
+      summary: Remove bookmark
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          name: storyId
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Removed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /users/{id}/reflections:
+    get:
+      operationId: getUserReflections
+      tags: [reflections]
+      summary: Get user reflections/notes
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Reflections
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Reflection"
+    post:
+      operationId: createReflection
+      tags: [reflections]
+      summary: Create a reflection note
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateReflectionBody"
+      responses:
+        "201":
+          description: Reflection created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Reflection"
+
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Get overall platform statistics
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+
+  /dashboard/daily-quote:
+    get:
+      operationId: getDailyQuote
+      tags: [dashboard]
+      summary: Get daily Quran/Hadith quote
+      responses:
+        "200":
+          description: Daily quote
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DailyQuote"
+
+  /dashboard/leaderboard:
+    get:
+      operationId: getLeaderboard
+      tags: [dashboard]
+      summary: Get top users by XP
+      responses:
+        "200":
+          description: Leaderboard
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LeaderboardEntry"
+
 components:
   schemas:
     HealthStatus:
@@ -31,6 +385,309 @@ components:
       properties:
         status:
           type: string
-      required:
-        - status
+      required: [status]
 
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+      required: [success]
+
+    Story:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        titleAr:
+          type: string
+        slug:
+          type: string
+        excerpt:
+          type: string
+        content:
+          type: string
+        categoryId:
+          type: integer
+        categoryName:
+          type: string
+        difficulty:
+          type: string
+          enum: [beginner, intermediate, advanced]
+        theme:
+          type: string
+        readingTimeMinutes:
+          type: integer
+        isFeatured:
+          type: boolean
+        coverImageUrl:
+          type: string
+        lessons:
+          type: string
+        xpReward:
+          type: integer
+        viewCount:
+          type: integer
+        createdAt:
+          type: string
+      required: [id, title, slug, excerpt, content, categoryId, categoryName, difficulty, readingTimeMinutes, isFeatured, xpReward, viewCount, createdAt]
+
+    CreateStoryBody:
+      type: object
+      properties:
+        title:
+          type: string
+        titleAr:
+          type: string
+        slug:
+          type: string
+        excerpt:
+          type: string
+        content:
+          type: string
+        categoryId:
+          type: integer
+        difficulty:
+          type: string
+          enum: [beginner, intermediate, advanced]
+        theme:
+          type: string
+        readingTimeMinutes:
+          type: integer
+        isFeatured:
+          type: boolean
+        coverImageUrl:
+          type: string
+        lessons:
+          type: string
+        xpReward:
+          type: integer
+      required: [title, slug, excerpt, content, categoryId, difficulty, readingTimeMinutes]
+
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        nameAr:
+          type: string
+        slug:
+          type: string
+        description:
+          type: string
+        iconName:
+          type: string
+        color:
+          type: string
+        storyCount:
+          type: integer
+      required: [id, name, slug, storyCount]
+
+    CreateCategoryBody:
+      type: object
+      properties:
+        name:
+          type: string
+        nameAr:
+          type: string
+        slug:
+          type: string
+        description:
+          type: string
+        iconName:
+          type: string
+        color:
+          type: string
+      required: [name, slug]
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        avatarUrl:
+          type: string
+        joinedAt:
+          type: string
+        preferredLanguage:
+          type: string
+      required: [id, name, email, joinedAt]
+
+    UserProgress:
+      type: object
+      properties:
+        userId:
+          type: integer
+        xp:
+          type: integer
+        level:
+          type: integer
+        levelName:
+          type: string
+        streak:
+          type: integer
+        totalStoriesRead:
+          type: integer
+        totalMinutesRead:
+          type: integer
+        badges:
+          type: array
+          items:
+            $ref: "#/components/schemas/Badge"
+        recentActivity:
+          type: array
+          items:
+            $ref: "#/components/schemas/ActivityItem"
+      required: [userId, xp, level, levelName, streak, totalStoriesRead, totalMinutesRead, badges, recentActivity]
+
+    Badge:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        iconName:
+          type: string
+        earnedAt:
+          type: string
+      required: [id, name, description, iconName]
+
+    ActivityItem:
+      type: object
+      properties:
+        storyId:
+          type: integer
+        storyTitle:
+          type: string
+        completedAt:
+          type: string
+        xpEarned:
+          type: integer
+      required: [storyId, storyTitle, completedAt, xpEarned]
+
+    RecordProgressBody:
+      type: object
+      properties:
+        storyId:
+          type: integer
+        completed:
+          type: boolean
+        minutesSpent:
+          type: integer
+      required: [storyId, completed, minutesSpent]
+
+    Bookmark:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        storyId:
+          type: integer
+        storyTitle:
+          type: string
+        storyCoverImageUrl:
+          type: string
+        storyExcerpt:
+          type: string
+        storyReadingTimeMinutes:
+          type: integer
+        createdAt:
+          type: string
+      required: [id, userId, storyId, storyTitle, storyExcerpt, storyReadingTimeMinutes, createdAt]
+
+    AddBookmarkBody:
+      type: object
+      properties:
+        storyId:
+          type: integer
+      required: [storyId]
+
+    Reflection:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        storyId:
+          type: integer
+        storyTitle:
+          type: string
+        content:
+          type: string
+        createdAt:
+          type: string
+      required: [id, userId, storyId, storyTitle, content, createdAt]
+
+    CreateReflectionBody:
+      type: object
+      properties:
+        storyId:
+          type: integer
+        content:
+          type: string
+      required: [storyId, content]
+
+    DashboardSummary:
+      type: object
+      properties:
+        totalStories:
+          type: integer
+        totalUsers:
+          type: integer
+        totalCategories:
+          type: integer
+        storiesReadToday:
+          type: integer
+        mostReadCategory:
+          type: string
+        featuredStory:
+          $ref: "#/components/schemas/Story"
+      required: [totalStories, totalUsers, totalCategories, storiesReadToday, mostReadCategory]
+
+    DailyQuote:
+      type: object
+      properties:
+        text:
+          type: string
+        textAr:
+          type: string
+        source:
+          type: string
+        date:
+          type: string
+      required: [text, source, date]
+
+    LeaderboardEntry:
+      type: object
+      properties:
+        rank:
+          type: integer
+        userId:
+          type: integer
+        userName:
+          type: string
+        avatarUrl:
+          type: string
+        xp:
+          type: integer
+        level:
+          type: integer
+        levelName:
+          type: string
+        streak:
+          type: integer
+      required: [rank, userId, userName, xp, level, levelName, streak]
