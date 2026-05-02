@@ -69,12 +69,13 @@ router.get("/dashboard/summary", async (_req, res) => {
 router.get("/dashboard/daily-quote", async (_req, res) => {
   const quotes = await db.select().from(dailyQuotesTable);
   if (quotes.length === 0) {
-    return res.json({
+    res.json({
       text: "Indeed, with hardship comes ease.",
       textAr: "فَإِنَّ مَعَ الْعُسْرِ يُسْرًا",
       source: "Quran 94:5",
       date: new Date().toISOString().split("T")[0],
     });
+    return;
   }
   const quote = quotes[Math.floor(Date.now() / 86400000) % quotes.length];
   res.json({ ...quote, date: new Date().toISOString().split("T")[0] });

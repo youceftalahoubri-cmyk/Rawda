@@ -192,6 +192,7 @@ export type ListStoriesParams = {
   search?: string;
   limit?: number;
   offset?: number;
+  sortBy?: ListStoriesSortBy;
 };
 
 export type ListStoriesDifficulty =
@@ -201,4 +202,15 @@ export const ListStoriesDifficulty = {
   beginner: "beginner",
   intermediate: "intermediate",
   advanced: "advanced",
+} as const;
+
+export type ListStoriesSortBy =
+  (typeof ListStoriesSortBy)[keyof typeof ListStoriesSortBy];
+
+export const ListStoriesSortBy = {
+  newest: "newest",
+  popular: "popular",
+  shortest: "shortest",
+  longest: "longest",
+  xp: "xp",
 } as const;

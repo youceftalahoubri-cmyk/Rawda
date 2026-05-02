@@ -20,10 +20,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BookOpen, Flame, Star, Trophy, Clock, Medal, Bookmark, Trash2, PenLine, CalendarDays } from "lucide-react";
 import { motion } from "framer-motion";
+import { usePageTitle } from "@/hooks/use-page-title";
 
 const HARDCODED_USER_ID = 1;
 
 export default function Dashboard() {
+  usePageTitle("My Dashboard");
   const { data: user, isLoading: isUserLoading } = useGetUser(HARDCODED_USER_ID, {
     query: { queryKey: getGetUserQueryKey(HARDCODED_USER_ID) }
   });
@@ -39,7 +41,7 @@ export default function Dashboard() {
   const { data: reflections, isLoading: isReflectionsLoading } = useGetUserReflections(HARDCODED_USER_ID, {
     query: { queryKey: getGetUserReflectionsQueryKey(HARDCODED_USER_ID) }
   });
-  const deleteReflection = useDeleteReflection(HARDCODED_USER_ID);
+  const deleteReflection = useDeleteReflection();
   const queryClient = useQueryClient();
 
   const nextLevelXp = (progress?.level || 1) * 1000;
@@ -261,7 +263,7 @@ export default function Dashboard() {
                               size="icon"
                               className="h-7 w-7 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
                               onClick={() => {
-                                deleteReflection.mutate({ reflectionId: reflection.id }, {
+                                deleteReflection.mutate({ id: HARDCODED_USER_ID, reflectionId: reflection.id }, {
                                   onSuccess: () => queryClient.invalidateQueries({ queryKey: getGetUserReflectionsQueryKey(HARDCODED_USER_ID) })
                                 });
                               }}

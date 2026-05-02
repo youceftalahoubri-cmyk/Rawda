@@ -9,7 +9,7 @@ const router: IRouter = Router();
 router.get("/users/:id", async (req, res) => {
   const params = GetUserParams.parse({ id: req.params.id });
   const [user] = await db.select().from(usersTable).where(eq(usersTable.id, params.id));
-  if (!user) return res.status(404).json({ error: "User not found" });
+  if (!user) { res.status(404).json({ error: "User not found" }); return; }
   res.json({ ...user, joinedAt: user.joinedAt?.toISOString() ?? new Date().toISOString() });
 });
 

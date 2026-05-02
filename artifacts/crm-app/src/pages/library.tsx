@@ -7,10 +7,11 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Clock, Search, Star, BookOpen, X, Loader2 } from "lucide-react";
+import { Clock, Search, Star, BookOpen, X, Loader2, ArrowUpDown } from "lucide-react";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { HighlightText } from "@/components/highlight-text";
+import { usePageTitle } from "@/hooks/use-page-title";
 
 function useDebounce<T>(value: T, delay: number): T {
   const [debounced, setDebounced] = useState(value);
@@ -29,6 +30,8 @@ export default function Library() {
   const [searchInput, setSearchInput] = useState("");
   const [category, setCategory] = useState<string>(initialCategory);
   const [difficulty, setDifficulty] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<string>("newest");
+  usePageTitle("The Library");
   const searchRef = useRef<HTMLInputElement>(null);
 
   const debouncedSearch = useDebounce(searchInput, 320);
@@ -38,6 +41,7 @@ export default function Library() {
     search: debouncedSearch || undefined,
     categoryId: category !== "all" ? parseInt(category) : undefined,
     difficulty: difficulty !== "all" ? (difficulty as "beginner" | "intermediate" | "advanced") : undefined,
+    sortBy: sortBy as "newest" | "popular" | "shortest" | "longest" | "xp",
   });
 
   const { data: categories } = useListCategories();
@@ -47,8 +51,8 @@ export default function Library() {
     searchRef.current?.focus();
   }, []);
 
-  const hasFilters = searchInput || category !== "all" || difficulty !== "all";
-  const clearAll = () => { setSearchInput(""); setCategory("all"); setDifficulty("all"); };
+  const hasFilters = searchInput || category !== "all" || difficulty !== "all" || sortBy !== "newest";
+  const clearAll = () => { setSearchInput(""); setCategory("all"); setDifficulty("all"); setSortBy("newest"); };
 
   // ⌘K / Ctrl+K shortcut
   useEffect(() => {
@@ -107,9 +111,9 @@ export default function Library() {
             </div>
 
             {/* Filters */}
-            <div className="flex gap-3">
+            <div className="flex flex-wrap gap-3">
               <Select value={category} onValueChange={setCategory}>
-                <SelectTrigger className="w-[160px] h-12 bg-background">
+                <SelectTrigger className="w-[155px] h-12 bg-background">
                   <SelectValue placeholder="Category" />
                 </SelectTrigger>
                 <SelectContent>
@@ -120,7 +124,7 @@ export default function Library() {
                 </SelectContent>
               </Select>
               <Select value={difficulty} onValueChange={setDifficulty}>
-                <SelectTrigger className="w-[150px] h-12 bg-background">
+                <SelectTrigger className="w-[135px] h-12 bg-background">
                   <SelectValue placeholder="Level" />
                 </SelectTrigger>
                 <SelectContent>
@@ -128,6 +132,19 @@ export default function Library() {
                   <SelectItem value="beginner">Beginner</SelectItem>
                   <SelectItem value="intermediate">Intermediate</SelectItem>
                   <SelectItem value="advanced">Advanced</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="w-[150px] h-12 bg-background">
+                  <ArrowUpDown className="h-4 w-4 mr-2 opacity-50" />
+                  <SelectValue placeholder="Sort" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="newest">Newest</SelectItem>
+                  <SelectItem value="popular">Most Popular</SelectItem>
+                  <SelectItem value="shortest">Shortest</SelectItem>
+                  <SelectItem value="longest">Longest</SelectItem>
+                  <SelectItem value="xp">Highest XP</SelectItem>
                 </SelectContent>
               </Select>
             </div>

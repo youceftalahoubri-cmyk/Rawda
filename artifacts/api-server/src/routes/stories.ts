@@ -1,7 +1,7 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
 import { storiesTable, categoriesTable } from "@workspace/db";
-import { eq, ilike, and, sql } from "drizzle-orm";
+import { eq, ilike, and, sql, desc, asc } from "drizzle-orm";
 import {
   ListStoriesQueryParams,
   CreateStoryBody,
@@ -21,6 +21,15 @@ router.get("/stories", async (req, res) => {
       sql`(${storiesTable.title} ILIKE ${`%${query.search}%`} OR ${storiesTable.titleAr} ILIKE ${`%${query.search}%`} OR ${storiesTable.excerpt} ILIKE ${`%${query.search}%`} OR ${storiesTable.theme} ILIKE ${`%${query.search}%`} OR ${storiesTable.lessons} ILIKE ${`%${query.search}%`})`
     );
   }
+  const sortOrderMap = {
+    newest: desc(storiesTable.createdAt),
+    popular: desc(storiesTable.viewCount),
+    shortest: asc(storiesTable.readingTimeMinutes),
+    longest: desc(storiesTable.readingTimeMinutes),
+    xp: desc(storiesTable.xpReward),
+  };
+  const orderBy = query.sortBy ? sortOrderMap[query.sortBy as keyof typeof sortOrderMap] : desc(storiesTable.createdAt);
+
   const rows = await db
     .select({
       id: storiesTable.id,
@@ -44,6 +53,7 @@ router.get("/stories", async (req, res) => {
     .from(storiesTable)
     .leftJoin(categoriesTable, eq(storiesTable.categoryId, categoriesTable.id))
     .where(conditions.length > 0 ? and(...conditions) : undefined)
+    .orderBy(orderBy)
     .limit(query.limit ?? 20)
     .offset(query.offset ?? 0);
   res.json(rows.map(r => ({ ...r, createdAt: r.createdAt?.toISOString() ?? new Date().toISOString(), categoryName: r.categoryName ?? "" })));
@@ -103,7 +113,7 @@ router.get("/stories/:id", async (req, res) => {
     .from(storiesTable)
     .leftJoin(categoriesTable, eq(storiesTable.categoryId, categoriesTable.id))
     .where(eq(storiesTable.id, params.id));
-  if (!row) return res.status(404).json({ error: "Story not found" });
+  if (!row) { res.status(404).json({ error: "Story not found" }); return; }
   res.json({ ...row, createdAt: row.createdAt?.toISOString() ?? new Date().toISOString(), categoryName: row.categoryName ?? "" });
 });
 

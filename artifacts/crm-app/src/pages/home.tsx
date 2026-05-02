@@ -11,8 +11,10 @@ import {
 } from "@workspace/api-client-react";
 import { BookOpen, ChevronRight, Clock, Moon, Star, Trophy } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { usePageTitle } from "@/hooks/use-page-title";
 
 export default function Home() {
+  usePageTitle(null);
   const { data: featuredStories, isLoading: isFeaturedLoading } = useGetFeaturedStories();
   const { data: quote, isLoading: isQuoteLoading } = useGetDailyQuote();
   const { data: categories, isLoading: isCategoriesLoading } = useListCategories();

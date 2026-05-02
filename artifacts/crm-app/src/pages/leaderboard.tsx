@@ -4,8 +4,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Trophy, Flame, Medal } from "lucide-react";
 import { motion } from "framer-motion";
+import { usePageTitle } from "@/hooks/use-page-title";
 
 export default function Leaderboard() {
+  usePageTitle("Leaderboard");
   const { data: leaderboard, isLoading } = useGetLeaderboard();
 
   return (

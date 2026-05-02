@@ -8,6 +8,7 @@ import { useListStories, useGetUserProgress, getGetUserProgressQueryKey } from "
 import { Skeleton } from "@/components/ui/skeleton";
 import { Clock, Star, CheckCircle2, Moon, Flame, BookOpen, ChevronRight } from "lucide-react";
 import { useState, useEffect } from "react";
+import { usePageTitle } from "@/hooks/use-page-title";
 
 const HARDCODED_USER_ID = 1;
 const STORAGE_KEY = "rawdat-ramadan-challenge";
@@ -90,6 +91,7 @@ function useChallenge() {
 }
 
 export default function RamadanPage() {
+  usePageTitle("Ramadan Special");
   const { data: stories, isLoading } = useListStories({ categoryId: 5 });
   const { data: progress } = useGetUserProgress(HARDCODED_USER_ID, {
     query: { queryKey: getGetUserProgressQueryKey(HARDCODED_USER_ID) }

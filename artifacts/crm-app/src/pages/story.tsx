@@ -18,11 +18,15 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Bookmark, BookmarkCheck, CheckCircle2, Clock, Share2, Star, Send, Trash2, PenLine } from "lucide-react";
+import { ArrowLeft, Bookmark, BookmarkCheck, CheckCircle2, Clock, Share2, Star, Send, Trash2, PenLine, Maximize2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import { AudioPlayer } from "@/components/audio-player";
+import { ScrollProgress } from "@/components/scroll-progress";
+import { ReadingMode } from "@/components/reading-mode";
+import { BackToTop } from "@/components/back-to-top";
+import { usePageTitle } from "@/hooks/use-page-title";
 
 const HARDCODED_USER_ID = 1;
 
@@ -35,6 +39,7 @@ export default function StoryPage() {
   const [reflectionText, setReflectionText] = useState("");
   const [readingTime, setReadingTime] = useState(0);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [readingMode, setReadingMode] = useState(false);
 
   // Queries
   const { data: story, isLoading: isStoryLoading } = useGetStory(id, { 
@@ -50,27 +55,37 @@ export default function StoryPage() {
   });
 
   // Mutations
-  const recordProgress = useRecordStoryProgress(HARDCODED_USER_ID);
-  const addBookmark = useAddBookmark(HARDCODED_USER_ID);
-  const removeBookmark = useRemoveBookmark(HARDCODED_USER_ID);
-  const createReflection = useCreateReflection(HARDCODED_USER_ID);
-  const deleteReflection = useDeleteReflection(HARDCODED_USER_ID);
+  const recordProgress = useRecordStoryProgress();
+  const addBookmark = useAddBookmark();
+  const removeBookmark = useRemoveBookmark();
+  const createReflection = useCreateReflection();
+  const deleteReflection = useDeleteReflection();
 
   const isBookmarked = bookmarks?.some(b => b.storyId === id);
   const storyReflections = reflections?.filter(r => r.storyId === id);
+
+  usePageTitle(story?.title);
 
   // Reading time tracking
   useEffect(() => {
     const interval = setInterval(() => {
       setReadingTime(prev => prev + 1);
-    }, 60000); // Every minute
+    }, 60000);
     return () => clearInterval(interval);
+  }, []);
+
+  // Esc key exits reading mode
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setReadingMode(false); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
   }, []);
 
   const handleMarkAsRead = () => {
     if (isCompleted) return;
     
     recordProgress.mutate({ 
+      id: HARDCODED_USER_ID,
       data: { storyId: id, completed: true, minutesSpent: readingTime } 
     }, {
       onSuccess: (data) => {
@@ -87,7 +102,7 @@ export default function StoryPage() {
     if (isBookmarked) {
       const bookmarkId = bookmarks?.find(b => b.storyId === id)?.id;
       if (bookmarkId) {
-        removeBookmark.mutate({ id: bookmarkId }, {
+        removeBookmark.mutate({ id: bookmarkId, storyId: id }, {
           onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: getGetUserBookmarksQueryKey(HARDCODED_USER_ID) });
             toast({ title: "Bookmark removed" });
@@ -95,7 +110,7 @@ export default function StoryPage() {
         });
       }
     } else {
-      addBookmark.mutate({ data: { storyId: id } }, {
+      addBookmark.mutate({ id: HARDCODED_USER_ID, data: { storyId: id } }, {
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: getGetUserBookmarksQueryKey(HARDCODED_USER_ID) });
           toast({ title: "Story bookmarked" });
@@ -107,7 +122,7 @@ export default function StoryPage() {
   const handlePostReflection = () => {
     if (!reflectionText.trim()) return;
     
-    createReflection.mutate({ data: { storyId: id, content: reflectionText } }, {
+    createReflection.mutate({ id: HARDCODED_USER_ID, data: { storyId: id, content: reflectionText } }, {
       onSuccess: () => {
         setReflectionText("");
         queryClient.invalidateQueries({ queryKey: getGetUserReflectionsQueryKey(HARDCODED_USER_ID) });
@@ -117,12 +132,28 @@ export default function StoryPage() {
   };
 
   const handleDeleteReflection = (reflectionId: number) => {
-    deleteReflection.mutate({ reflectionId }, {
+    deleteReflection.mutate({ id: HARDCODED_USER_ID, reflectionId }, {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: getGetUserReflectionsQueryKey(HARDCODED_USER_ID) });
         toast({ title: "Reflection deleted" });
       }
     });
+  };
+
+  const handleShare = async () => {
+    const url = window.location.href;
+    const shareData = { title: story?.title ?? "Rawdat Story", text: story?.excerpt ?? "", url };
+    try {
+      if (navigator.share && navigator.canShare?.(shareData)) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(url);
+        toast({ title: "Link copied!", description: "Share this story with someone you love." });
+      }
+    } catch {
+      await navigator.clipboard.writeText(url);
+      toast({ title: "Link copied!" });
+    }
   };
 
   if (isStoryLoading) {
@@ -157,6 +188,18 @@ export default function StoryPage() {
 
   return (
     <Layout>
+      <ScrollProgress />
+      <BackToTop />
+
+      {readingMode && (
+        <ReadingMode
+          title={story.title}
+          titleAr={story.titleAr}
+          content={story.content}
+          onClose={() => setReadingMode(false)}
+        />
+      )}
+
       <article className="pb-24">
         {/* Header Hero */}
         <header className="relative bg-muted/30 pt-20 pb-16 border-b border-border/40">
@@ -215,8 +258,17 @@ export default function StoryPage() {
                   <><Bookmark className="mr-2 h-4 w-4" /> Save for later</>
                 )}
               </Button>
-              <Button variant="ghost" size="sm" className="text-muted-foreground">
+              <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={handleShare}>
                 <Share2 className="mr-2 h-4 w-4" /> Share
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground hidden md:inline-flex"
+                onClick={() => setReadingMode(true)}
+                title="Enter distraction-free reading mode"
+              >
+                <Maximize2 className="mr-2 h-4 w-4" /> Read Mode
               </Button>
             </div>
           </div>

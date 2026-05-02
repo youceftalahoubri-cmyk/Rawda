@@ -69,6 +69,11 @@ paths:
           name: offset
           schema:
             type: integer
+        - in: query
+          name: sortBy
+          schema:
+            type: string
+            enum: [newest, popular, shortest, longest, xp]
       responses:
         "200":
           description: List of stories

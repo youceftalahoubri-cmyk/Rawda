@@ -24,6 +24,9 @@ export const ListStoriesQueryParams = zod.object({
   search: zod.coerce.string().optional(),
   limit: zod.coerce.number().optional(),
   offset: zod.coerce.number().optional(),
+  sortBy: zod
+    .enum(["newest", "popular", "shortest", "longest", "xp"])
+    .optional(),
 });
 
 export const ListStoriesResponseItem = zod.object({

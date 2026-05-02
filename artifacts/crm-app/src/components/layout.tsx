@@ -1,8 +1,9 @@
 import { Link, useLocation } from "wouter";
 import { useTheme } from "@/components/theme-provider";
-import { BookOpen, Moon, Sun, User, Search } from "lucide-react";
+import { BookOpen, Moon, Sun, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AudioMiniPlayer } from "@/components/audio-mini-player";
+import { MobileNav } from "@/components/mobile-nav";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const { theme, setTheme } = useTheme();
@@ -35,11 +36,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           </div>
 
           <div className="flex items-center gap-2">
-            <Link href="/library" className="md:hidden">
-              <Button variant="ghost" size="icon">
-                <Search className="h-5 w-5" />
-              </Button>
-            </Link>
+            <MobileNav />
             <Button
               variant="ghost"
               size="icon"
@@ -63,15 +60,51 @@ export function Layout({ children }: { children: React.ReactNode }) {
         {children}
       </main>
 
-      <footer className="border-t border-border/40 bg-muted/20 py-8">
-        <div className="container mx-auto px-4 text-center">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <BookOpen className="h-5 w-5 text-primary opacity-50" />
-            <span className="font-serif font-semibold text-lg text-primary opacity-50">Rawdat</span>
+      <footer className="border-t border-border/40 bg-muted/20 py-12">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <BookOpen className="h-5 w-5 text-primary" />
+                <span className="font-serif font-bold text-lg text-primary">Rawdat</span>
+              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                A digital sanctuary for exploring Islamic history and wisdom through beautiful storytelling.
+              </p>
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-3">Explore</p>
+              <ul className="space-y-2 text-sm">
+                {[
+                  { href: "/library", label: "Story Library" },
+                  { href: "/library?category=5", label: "Ramadan Special" },
+                  { href: "/leaderboard", label: "Leaderboard" },
+                ].map(({ href, label }) => (
+                  <li key={href}>
+                    <Link href={href} className="text-muted-foreground hover:text-primary transition-colors">{label}</Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-3">Your Journey</p>
+              <ul className="space-y-2 text-sm">
+                {[
+                  { href: "/dashboard", label: "Dashboard" },
+                  { href: "/dashboard", label: "My Reflections" },
+                  { href: "/ramadan", label: "30-Day Challenge" },
+                ].map(({ href, label }, i) => (
+                  <li key={i}>
+                    <Link href={href} className="text-muted-foreground hover:text-primary transition-colors">{label}</Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
-          <p className="text-sm text-muted-foreground max-w-md mx-auto">
-            A digital sanctuary for exploring Islamic history through beautiful storytelling.
-          </p>
+          <div className="border-t border-border/40 pt-6 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} Rawdat. Built with care for the ummah.</p>
+            <p className="text-xs text-muted-foreground italic font-serif">رَوْضَة — a garden, a meadow of delight</p>
+          </div>
         </div>
       </footer>
 
