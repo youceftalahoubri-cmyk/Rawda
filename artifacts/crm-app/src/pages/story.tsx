@@ -21,6 +21,7 @@ import { ArrowLeft, Bookmark, BookmarkCheck, CheckCircle2, Clock, Share2, Star, 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
+import { AudioPlayer } from "@/components/audio-player";
 
 const HARDCODED_USER_ID = 1;
 
@@ -212,6 +213,16 @@ export default function StoryPage() {
 
         {/* Story Content */}
         <div className="container mx-auto px-4 max-w-3xl py-16">
+          <AudioPlayer
+            story={{
+              id: story.id,
+              title: story.title,
+              content: story.content,
+              categoryName: story.categoryName,
+              readingTimeMinutes: story.readingTimeMinutes,
+            }}
+          />
+
           <div 
             className="prose prose-lg dark:prose-invert max-w-none prose-headings:font-serif prose-p:leading-loose prose-p:text-foreground/90"
             dangerouslySetInnerHTML={{ __html: story.content }}

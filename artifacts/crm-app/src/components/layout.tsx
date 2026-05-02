@@ -1,7 +1,8 @@
 import { Link, useLocation } from "wouter";
 import { useTheme } from "@/components/theme-provider";
-import { BookOpen, Moon, Sun, User, Trophy, Search } from "lucide-react";
+import { BookOpen, Moon, Sun, User, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { AudioMiniPlayer } from "@/components/audio-mini-player";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const { theme, setTheme } = useTheme();
@@ -69,6 +70,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
           </p>
         </div>
       </footer>
+
+      <AudioMiniPlayer />
     </div>
   );
 }
