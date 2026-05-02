@@ -18,7 +18,7 @@ router.get("/stories", async (req, res) => {
   if (query.theme) conditions.push(ilike(storiesTable.theme, `%${query.theme}%`));
   if (query.search) {
     conditions.push(
-      sql`(${storiesTable.title} ILIKE ${`%${query.search}%`} OR ${storiesTable.excerpt} ILIKE ${`%${query.search}%`})`
+      sql`(${storiesTable.title} ILIKE ${`%${query.search}%`} OR ${storiesTable.titleAr} ILIKE ${`%${query.search}%`} OR ${storiesTable.excerpt} ILIKE ${`%${query.search}%`} OR ${storiesTable.theme} ILIKE ${`%${query.search}%`} OR ${storiesTable.lessons} ILIKE ${`%${query.search}%`})`
     );
   }
   const rows = await db
