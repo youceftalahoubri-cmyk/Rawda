@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AudioProvider } from "@/contexts/audio-context";
+import { LanguageProvider } from "@/contexts/language-context";
 
 import Home from "@/pages/home";
 import Library from "@/pages/library";
@@ -35,12 +36,16 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="light" storageKey="rawdat-theme">
-        <AudioProvider>
-          <TooltipProvider>
-            <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}> <Router /> </WouterRouter>
-            <Toaster />
-          </TooltipProvider>
-        </AudioProvider>
+        <LanguageProvider>
+          <AudioProvider>
+            <TooltipProvider>
+              <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+                <Router />
+              </WouterRouter>
+              <Toaster />
+            </TooltipProvider>
+          </AudioProvider>
+        </LanguageProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );
