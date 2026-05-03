@@ -34,20 +34,20 @@ function Router() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="light" storageKey="rawdat-theme">
-        <LanguageProvider>
-          <AudioProvider>
-            <TooltipProvider>
-              <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+    <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider defaultTheme="light" storageKey="rawdat-theme">
+          <LanguageProvider>
+            <AudioProvider>
+              <TooltipProvider>
                 <Router />
-              </WouterRouter>
-              <Toaster />
-            </TooltipProvider>
-          </AudioProvider>
-        </LanguageProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
+                <Toaster />
+              </TooltipProvider>
+            </AudioProvider>
+          </LanguageProvider>
+        </ThemeProvider>
+      </QueryClientProvider>
+    </WouterRouter>
   );
 }
 
