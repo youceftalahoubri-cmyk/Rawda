@@ -47,7 +47,7 @@ export default function SignInPage() {
           <div className="flex flex-col items-center mb-8">
             <div className="flex items-center gap-2 mb-2">
               <BookOpen className="h-8 w-8 text-primary" />
-              <span className="font-serif font-bold text-2xl text-primary">Rawdat</span>
+              <span className="font-serif font-bold text-2xl text-primary">Rawda</span>
             </div>
             <p className="text-xs text-muted-foreground italic font-serif">رَوْضَة</p>
           </div>

@@ -52,7 +52,7 @@ export function MobileNav() {
               <div className="flex items-center justify-between p-5 border-b border-white/10 bg-white/5">
                 <Link href="/" onClick={() => setOpen(false)} className="flex items-center gap-2">
                   <BookOpen className="h-5 w-5 text-amber-300" />
-                  <span className="font-serif font-bold text-lg text-amber-100">Rawdat</span>
+                  <span className="font-serif font-bold text-lg text-amber-100">Rawda</span>
                 </Link>
                 <Button variant="ghost" size="icon" className="text-slate-100 hover:bg-white/10 hover:text-white" onClick={() => setOpen(false)} aria-label="Close menu">
                   <X className="h-5 w-5" />

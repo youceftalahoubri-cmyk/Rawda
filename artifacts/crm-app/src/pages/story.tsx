@@ -148,7 +148,7 @@ export default function StoryPage() {
 
   const handleShare = async () => {
     const url = window.location.href;
-    const shareData = { title: story?.title ?? "Rawdat Story", text: story?.excerpt ?? "", url };
+    const shareData = { title: story?.title ?? "Rawda Story", text: story?.excerpt ?? "", url };
     try {
       if (navigator.share && navigator.canShare?.(shareData)) {
         await navigator.share(shareData);

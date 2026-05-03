@@ -19,7 +19,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-6">
             <Link href="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
               <BookOpen className="h-6 w-6 text-primary" />
-              <span className="font-serif font-bold text-xl tracking-tight text-primary">Rawdat</span>
+              <span className="font-serif font-bold text-xl tracking-tight text-primary">Rawda</span>
             </Link>
             <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
               <Link href="/library" className={`transition-colors hover:text-primary ${location === '/library' ? 'text-primary' : 'text-muted-foreground'}`}>
@@ -72,7 +72,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <BookOpen className="h-5 w-5 text-primary" />
-                <span className="font-serif font-bold text-lg text-primary">Rawdat</span>
+                <span className="font-serif font-bold text-lg text-primary">Rawda</span>
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed">{t.footer.tagline}</p>
             </div>
@@ -106,7 +106,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             </div>
           </div>
           <div className="border-t border-border/40 pt-6 flex flex-col sm:flex-row items-center justify-between gap-2">
-            <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} Rawdat. {t.footer.copyright}</p>
+            <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} Rawda. {t.footer.copyright}</p>
             <p className="text-xs text-muted-foreground italic font-serif">{t.footer.garden}</p>
           </div>
         </div>
