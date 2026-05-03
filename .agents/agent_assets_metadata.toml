@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "IQkkn4BtjBj24PwMpzEP_"
+uri = "file://rawdat-project.tar.gz"
+type = "unspecified"
+title = "Rawdat — Full Project Archive"
