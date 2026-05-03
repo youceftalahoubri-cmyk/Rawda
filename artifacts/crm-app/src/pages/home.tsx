@@ -13,6 +13,7 @@ import { BookOpen, ChevronRight, Clock, Moon, Star } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePageTitle } from "@/hooks/use-page-title";
 import { useLanguage } from "@/contexts/language-context";
+import { LanguageSwitcher } from "@/components/language-switcher";
 
 export default function Home() {
   usePageTitle(null);
@@ -37,6 +38,9 @@ export default function Home() {
             transition={{ duration: 0.8, ease: "easeOut" }}
             className="max-w-3xl mx-auto text-center"
           >
+            <div className="mb-8 flex justify-center">
+              <LanguageSwitcher />
+            </div>
             <h1 className="text-5xl lg:text-7xl font-serif font-bold text-foreground mb-6 leading-tight">
               {h.heroTitle1} <span className="text-primary">{h.heroHighlight}</span> {h.heroTitle2}
             </h1>
