@@ -11,6 +11,7 @@ import StoryPage from "@/pages/story";
 import Dashboard from "@/pages/dashboard";
 import Leaderboard from "@/pages/leaderboard";
 import Ramadan from "@/pages/ramadan";
+import SignInPage from "@/pages/sign-in";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient();
@@ -24,6 +25,7 @@ function Router() {
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/leaderboard" component={Leaderboard} />
       <Route path="/ramadan" component={Ramadan} />
+      <Route path="/sign-in" component={SignInPage} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -35,9 +37,7 @@ function App() {
       <ThemeProvider defaultTheme="light" storageKey="rawdat-theme">
         <AudioProvider>
           <TooltipProvider>
-            <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-              <Router />
-            </WouterRouter>
+            <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}> <Router /> </WouterRouter>
             <Toaster />
           </TooltipProvider>
         </AudioProvider>
