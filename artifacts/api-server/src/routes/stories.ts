@@ -1,7 +1,7 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
 import { storiesTable, categoriesTable } from "@workspace/db";
-import { eq, ilike, and, sql, desc, asc, ne, or } from "drizzle-orm";
+import { eq, ilike, and, sql, desc, asc, ne } from "drizzle-orm";
 import {
   ListStoriesQueryParams,
   CreateStoryBody,
@@ -18,7 +18,7 @@ router.get("/stories", async (req, res) => {
   if (query.theme) conditions.push(ilike(storiesTable.theme, `%${query.theme}%`));
   if (query.search) {
     conditions.push(
-      sql`(${storiesTable.title} ILIKE ${`%${query.search}%`} OR ${storiesTable.titleAr} ILIKE ${`%${query.search}%`} OR ${storiesTable.excerpt} ILIKE ${`%${query.search}%`} OR ${storiesTable.theme} ILIKE ${`%${query.search}%`} OR ${storiesTable.lessons} ILIKE ${`%${query.search}%`})`
+      sql`(${storiesTable.title} ILIKE ${`%${query.search}%`} OR ${storiesTable.titleAr} ILIKE ${`%${query.search}%`} OR ${storiesTable.excerpt} ILIKE ${`%${query.search}%`} OR ${storiesTable.excerptAr} ILIKE ${`%${query.search}%`} OR ${storiesTable.excerptFr} ILIKE ${`%${query.search}%`} OR ${storiesTable.content} ILIKE ${`%${query.search}%`} OR ${storiesTable.contentAr} ILIKE ${`%${query.search}%`} OR ${storiesTable.contentFr} ILIKE ${`%${query.search}%`} OR ${storiesTable.theme} ILIKE ${`%${query.search}%`} OR ${storiesTable.lessons} ILIKE ${`%${query.search}%`})`
     );
   }
   const sortOrderMap = {
@@ -35,17 +35,26 @@ router.get("/stories", async (req, res) => {
       id: storiesTable.id,
       title: storiesTable.title,
       titleAr: storiesTable.titleAr,
+      titleFr: storiesTable.titleFr,
       slug: storiesTable.slug,
       excerpt: storiesTable.excerpt,
+      excerptAr: storiesTable.excerptAr,
+      excerptFr: storiesTable.excerptFr,
       content: storiesTable.content,
+      contentAr: storiesTable.contentAr,
+      contentFr: storiesTable.contentFr,
       categoryId: storiesTable.categoryId,
       categoryName: categoriesTable.name,
+      categoryNameAr: categoriesTable.nameAr,
+      categoryNameFr: categoriesTable.nameFr,
       difficulty: storiesTable.difficulty,
       theme: storiesTable.theme,
       readingTimeMinutes: storiesTable.readingTimeMinutes,
       isFeatured: storiesTable.isFeatured,
       coverImageUrl: storiesTable.coverImageUrl,
       lessons: storiesTable.lessons,
+      lessonsAr: storiesTable.lessonsAr,
+      lessonsFr: storiesTable.lessonsFr,
       xpReward: storiesTable.xpReward,
       viewCount: storiesTable.viewCount,
       createdAt: storiesTable.createdAt,
@@ -56,7 +65,7 @@ router.get("/stories", async (req, res) => {
     .orderBy(orderBy)
     .limit(query.limit ?? 20)
     .offset(query.offset ?? 0);
-  res.json(rows.map(r => ({ ...r, createdAt: r.createdAt?.toISOString() ?? new Date().toISOString(), categoryName: r.categoryName ?? "" })));
+  res.json(rows.map(r => ({ ...r, createdAt: r.createdAt?.toISOString() ?? new Date().toISOString(), categoryName: r.categoryName ?? "", categoryNameAr: r.categoryNameAr ?? "", categoryNameFr: r.categoryNameFr ?? "" })));
 });
 
 router.get("/stories/featured", async (_req, res) => {
@@ -65,17 +74,26 @@ router.get("/stories/featured", async (_req, res) => {
       id: storiesTable.id,
       title: storiesTable.title,
       titleAr: storiesTable.titleAr,
+      titleFr: storiesTable.titleFr,
       slug: storiesTable.slug,
       excerpt: storiesTable.excerpt,
+      excerptAr: storiesTable.excerptAr,
+      excerptFr: storiesTable.excerptFr,
       content: storiesTable.content,
+      contentAr: storiesTable.contentAr,
+      contentFr: storiesTable.contentFr,
       categoryId: storiesTable.categoryId,
       categoryName: categoriesTable.name,
+      categoryNameAr: categoriesTable.nameAr,
+      categoryNameFr: categoriesTable.nameFr,
       difficulty: storiesTable.difficulty,
       theme: storiesTable.theme,
       readingTimeMinutes: storiesTable.readingTimeMinutes,
       isFeatured: storiesTable.isFeatured,
       coverImageUrl: storiesTable.coverImageUrl,
       lessons: storiesTable.lessons,
+      lessonsAr: storiesTable.lessonsAr,
+      lessonsFr: storiesTable.lessonsFr,
       xpReward: storiesTable.xpReward,
       viewCount: storiesTable.viewCount,
       createdAt: storiesTable.createdAt,
@@ -84,7 +102,7 @@ router.get("/stories/featured", async (_req, res) => {
     .leftJoin(categoriesTable, eq(storiesTable.categoryId, categoriesTable.id))
     .where(eq(storiesTable.isFeatured, true))
     .limit(5);
-  res.json(rows.map(r => ({ ...r, createdAt: r.createdAt?.toISOString() ?? new Date().toISOString(), categoryName: r.categoryName ?? "" })));
+  res.json(rows.map(r => ({ ...r, createdAt: r.createdAt?.toISOString() ?? new Date().toISOString(), categoryName: r.categoryName ?? "", categoryNameAr: r.categoryNameAr ?? "", categoryNameFr: r.categoryNameFr ?? "" })));
 });
 
 router.get("/stories/:id", async (req, res) => {
@@ -95,17 +113,26 @@ router.get("/stories/:id", async (req, res) => {
       id: storiesTable.id,
       title: storiesTable.title,
       titleAr: storiesTable.titleAr,
+      titleFr: storiesTable.titleFr,
       slug: storiesTable.slug,
       excerpt: storiesTable.excerpt,
+      excerptAr: storiesTable.excerptAr,
+      excerptFr: storiesTable.excerptFr,
       content: storiesTable.content,
+      contentAr: storiesTable.contentAr,
+      contentFr: storiesTable.contentFr,
       categoryId: storiesTable.categoryId,
       categoryName: categoriesTable.name,
+      categoryNameAr: categoriesTable.nameAr,
+      categoryNameFr: categoriesTable.nameFr,
       difficulty: storiesTable.difficulty,
       theme: storiesTable.theme,
       readingTimeMinutes: storiesTable.readingTimeMinutes,
       isFeatured: storiesTable.isFeatured,
       coverImageUrl: storiesTable.coverImageUrl,
       lessons: storiesTable.lessons,
+      lessonsAr: storiesTable.lessonsAr,
+      lessonsFr: storiesTable.lessonsFr,
       xpReward: storiesTable.xpReward,
       viewCount: storiesTable.viewCount,
       createdAt: storiesTable.createdAt,
@@ -114,14 +141,13 @@ router.get("/stories/:id", async (req, res) => {
     .leftJoin(categoriesTable, eq(storiesTable.categoryId, categoriesTable.id))
     .where(eq(storiesTable.id, params.id));
   if (!row) { res.status(404).json({ error: "Story not found" }); return; }
-  res.json({ ...row, createdAt: row.createdAt?.toISOString() ?? new Date().toISOString(), categoryName: row.categoryName ?? "" });
+  res.json({ ...row, createdAt: row.createdAt?.toISOString() ?? new Date().toISOString(), categoryName: row.categoryName ?? "", categoryNameAr: row.categoryNameAr ?? "", categoryNameFr: row.categoryNameFr ?? "" });
 });
 
 router.get("/stories/:id/related", async (req, res) => {
   const { id } = GetStoryParams.parse({ id: req.params.id });
   const limit = Math.min(parseInt(req.query.limit as string) || 3, 6);
 
-  // Fetch the current story to know its category and theme
   const [current] = await db
     .select({ categoryId: storiesTable.categoryId, theme: storiesTable.theme })
     .from(storiesTable)
@@ -133,23 +159,31 @@ router.get("/stories/:id/related", async (req, res) => {
     id: storiesTable.id,
     title: storiesTable.title,
     titleAr: storiesTable.titleAr,
+    titleFr: storiesTable.titleFr,
     slug: storiesTable.slug,
     excerpt: storiesTable.excerpt,
+    excerptAr: storiesTable.excerptAr,
+    excerptFr: storiesTable.excerptFr,
     content: storiesTable.content,
+    contentAr: storiesTable.contentAr,
+    contentFr: storiesTable.contentFr,
     categoryId: storiesTable.categoryId,
     categoryName: categoriesTable.name,
+    categoryNameAr: categoriesTable.nameAr,
+    categoryNameFr: categoriesTable.nameFr,
     difficulty: storiesTable.difficulty,
     theme: storiesTable.theme,
     readingTimeMinutes: storiesTable.readingTimeMinutes,
     isFeatured: storiesTable.isFeatured,
     coverImageUrl: storiesTable.coverImageUrl,
     lessons: storiesTable.lessons,
+    lessonsAr: storiesTable.lessonsAr,
+    lessonsFr: storiesTable.lessonsFr,
     xpReward: storiesTable.xpReward,
     viewCount: storiesTable.viewCount,
     createdAt: storiesTable.createdAt,
   };
 
-  // Priority 1: same category AND same theme
   const sameConditions = [
     ne(storiesTable.id, id),
     eq(storiesTable.categoryId, current.categoryId),
@@ -164,7 +198,6 @@ router.get("/stories/:id/related", async (req, res) => {
     .orderBy(desc(storiesTable.viewCount))
     .limit(limit);
 
-  // Fill remaining slots from same category
   if (rows.length < limit) {
     const existingIds = new Set([id, ...rows.map(r => r.id)]);
     const extra = await db
@@ -181,7 +214,6 @@ router.get("/stories/:id/related", async (req, res) => {
     rows = [...rows, ...extra];
   }
 
-  // Fill remaining slots from popular stories across all categories
   if (rows.length < limit) {
     const existingIds = new Set([id, ...rows.map(r => r.id)]);
     const fallback = await db
@@ -194,7 +226,7 @@ router.get("/stories/:id/related", async (req, res) => {
     rows = [...rows, ...fallback];
   }
 
-  res.json(rows.map(r => ({ ...r, createdAt: r.createdAt?.toISOString() ?? new Date().toISOString(), categoryName: r.categoryName ?? "" })));
+  res.json(rows.map(r => ({ ...r, createdAt: r.createdAt?.toISOString() ?? new Date().toISOString(), categoryName: r.categoryName ?? "", categoryNameAr: r.categoryNameAr ?? "", categoryNameFr: r.categoryNameFr ?? "" })));
 });
 
 router.post("/stories", async (req, res) => {
@@ -202,7 +234,7 @@ router.post("/stories", async (req, res) => {
   const [story] = await db.insert(storiesTable).values(body).returning();
   await db.update(categoriesTable).set({ storyCount: sql`${categoriesTable.storyCount} + 1` }).where(eq(categoriesTable.id, body.categoryId));
   const cat = await db.select().from(categoriesTable).where(eq(categoriesTable.id, body.categoryId)).limit(1);
-  res.status(201).json({ ...story, categoryName: cat[0]?.name ?? "", createdAt: story.createdAt?.toISOString() ?? new Date().toISOString() });
+  res.status(201).json({ ...story, categoryName: cat[0]?.name ?? "", categoryNameAr: cat[0]?.nameAr ?? "", categoryNameFr: cat[0]?.nameFr ?? "", createdAt: story.createdAt?.toISOString() ?? new Date().toISOString() });
 });
 
 export default router;

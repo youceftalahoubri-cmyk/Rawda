@@ -59,7 +59,6 @@ export function MobileNav() {
                 </Button>
               </div>
 
-              {/* Language switcher inside drawer */}
               <div className="p-4 border-b border-border/40">
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2">
                   <Globe className="h-3.5 w-3.5" /> {t.nav.language}
