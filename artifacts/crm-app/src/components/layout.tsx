@@ -39,9 +39,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
           </div>
 
           <div className="flex items-center gap-2">
-            <div className="block">
-              <LanguageSwitcher />
-            </div>
             <MobileNav />
             <Button
               variant="ghost"
@@ -58,6 +55,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 {t.nav.signIn}
               </Button>
             </Link>
+            <div className="hidden md:block">
+              <LanguageSwitcher />
+            </div>
           </div>
         </div>
       </header>
